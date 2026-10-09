@@ -598,6 +598,8 @@ void *dlsym_shim(void *handle, const char *name)
     return tl_shim_find(name);
 }
 
+static size_t ctype_get_mb_cur_max_shim(void) { return 4; }
+
 extern int *__error(void);
 
 static unsigned long getauxval_shim(unsigned long type)
@@ -845,6 +847,7 @@ static const tl_export_entry g_exports[] = {
     { "dlsym",                      dlsym_shim },
 
     { "getauxval",                  getauxval_shim },
+    { "__ctype_get_mb_cur_max",     ctype_get_mb_cur_max_shim },
     { "__errno",                    __errno_shim },
     { "__system_property_get",      __system_property_get_shim },
     { "__strlen_chk",               __strlen_chk_shim },

@@ -1,0 +1,87 @@
+name: Build patched Husk IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 360
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Select installed Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          for app in Xcode_26.3 Xcode_26.2 Xcode_26.1.1 Xcode_26.0.1; do
+            if [[ -d "/Applications/${app}.app" ]]; then
+              echo "DEVELOPER_DIR=/Applications/${app}.app/Contents/Developer" >> "$GITHUB_ENV"
+              break
+            fi
+          done
+          if [[ -z "${DEVELOPER_DIR:-}" ]]; then
+            echo "No supported Xcode 26 installation found" >&2
+            ls -d /Applications/Xcode*.app 2>/dev/null || true
+            exit 1
+          fi
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Install build tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          brew install meson ninja pkg-config xcodegen qemu
+          rustup target add aarch64-apple-ios
+          meson --version
+          ninja --version
+          xcodegen --version
+          qemu-img --version
+          cargo --version
+
+      - name: Verify the classic-loader fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -nF 'static size_t ctype_get_mb_cur_max_shim(void) { return 4; }' \
+            src/translation-layer/husk-tl-shim.c
+          grep -nF '{ "__ctype_get_mb_cur_max",     ctype_get_mb_cur_max_shim },' \
+            src/translation-layer/husk-tl-shim.c
+          git diff --check
+
+      - name: Build and package IPA/TIPA
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build
+          ./scripts/ci_build.sh build/Husk.ipa 2>&1 | tee build/ci-build.log
+
+      - name: Validate output files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s build/Husk.ipa
+          test -s build/Husk.tipa
+          unzip -tqq build/Husk.ipa
+          unzip -tqq build/Husk.tipa
+          unzip -l build/Husk.ipa | grep -E 'Payload/[^/]+\.app/(Info\.plist|[^/]+)$' | head -20
+
+      - name: Upload IPA, TIPA, and build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: husk-patched-build-${{ github.run_number }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            build/Husk.ipa
+            build/Husk.tipa
+            build/ci-build.log
+            build/logs/**/*.log

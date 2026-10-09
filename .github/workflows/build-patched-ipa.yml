@@ -59,6 +59,14 @@ jobs:
             src/translation-layer/husk-tl-shim.c
           git diff --check
 
+      - name: Normalize vendored StikJIT Swift interfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src/app/Frameworks/StikJIT.xcframework -name '*.swiftinterface' -type f \
+            -exec perl -pi -e 's/::/./g' {} +
+          ! grep -R -nF '::' src/app/Frameworks/StikJIT.xcframework --include='*.swiftinterface'
+
       - name: Build and package IPA/TIPA
         shell: bash
         run: |

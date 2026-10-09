@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 360
 
     steps:
@@ -19,7 +19,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for app in Xcode_26.3.0 Xcode_26.3 Xcode_26.2.0 Xcode_26.2 Xcode_26.1.1 Xcode_26.0.1; do
+          for app in Xcode_27.0.1 Xcode_27.0 Xcode_26.3.0 Xcode_26.3 Xcode_26.2.0 Xcode_26.2 Xcode_26.1.1 Xcode_26.0.1; do
             if [[ -d "/Applications/${app}.app" ]]; then
               export DEVELOPER_DIR="/Applications/${app}.app/Contents/Developer"
               echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
@@ -58,14 +58,6 @@ jobs:
           grep -nF '{ "__ctype_get_mb_cur_max",     ctype_get_mb_cur_max_shim },' \
             src/translation-layer/husk-tl-shim.c
           git diff --check
-
-      - name: Normalize vendored StikJIT Swift interfaces
-        shell: bash
-        run: |
-          set -euo pipefail
-          find src/app/Frameworks/StikJIT.xcframework -name '*.swiftinterface' -type f \
-            -exec perl -pi -e 's/::/./g' {} +
-          ! grep -R -nF '::' src/app/Frameworks/StikJIT.xcframework --include='*.swiftinterface'
 
       - name: Build and package IPA/TIPA
         shell: bash

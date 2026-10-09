@@ -19,9 +19,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for app in Xcode_26.3 Xcode_26.2 Xcode_26.1.1 Xcode_26.0.1; do
+          for app in Xcode_26.3.0 Xcode_26.3 Xcode_26.2.0 Xcode_26.2 Xcode_26.1.1 Xcode_26.0.1; do
             if [[ -d "/Applications/${app}.app" ]]; then
-              echo "DEVELOPER_DIR=/Applications/${app}.app/Contents/Developer" >> "$GITHUB_ENV"
+              export DEVELOPER_DIR="/Applications/${app}.app/Contents/Developer"
+              echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
               break
             fi
           done

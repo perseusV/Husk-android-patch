@@ -40,6 +40,7 @@ jobs:
           set -euo pipefail
           export HOMEBREW_NO_AUTO_UPDATE=1
           brew install meson ninja pkg-config xcodegen qemu
+          xcodebuild -downloadComponent MetalToolchain
           rustup target add aarch64-apple-ios
           python3 -m pip install --target "$RUNNER_TEMP/husk-python-deps" PyYAML
           echo "PYTHONPATH=$RUNNER_TEMP/husk-python-deps${PYTHONPATH:+:$PYTHONPATH}" >> "$GITHUB_ENV"

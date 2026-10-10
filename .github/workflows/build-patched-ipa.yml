@@ -58,6 +58,10 @@ jobs:
             src/translation-layer/husk-tl-shim.c
           grep -nF '{ "__ctype_get_mb_cur_max",     ctype_get_mb_cur_max_shim },' \
             src/translation-layer/husk-tl-shim.c
+          grep -nF 'static ssize_t __read_chk_shim(int fd, void *buf, size_t count, size_t buf_size)' \
+            src/translation-layer/husk-tl-shim.c
+          grep -nF '{ "__read_chk",                 __read_chk_shim },' \
+            src/translation-layer/husk-tl-shim.c
           git diff --check
 
       - name: Build and package IPA/TIPA

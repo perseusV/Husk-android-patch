@@ -643,6 +643,12 @@ static void *__memmove_chk_shim(void *dst, const void *src, size_t len, size_t d
     return memmove(dst, src, len);
 }
 
+static ssize_t __read_chk_shim(int fd, void *buf, size_t count, size_t buf_size)
+{
+    if (count > buf_size) abort();
+    return read(fd, buf, count);
+}
+
 static int __vsnprintf_chk_shim(char *s, size_t maxlen, int flag, size_t slen, const char *format, va_list args)
 {
     (void)flag; (void)slen;
@@ -852,6 +858,7 @@ static const tl_export_entry g_exports[] = {
     { "__system_property_get",      __system_property_get_shim },
     { "__strlen_chk",               __strlen_chk_shim },
     { "__memmove_chk",              __memmove_chk_shim },
+    { "__read_chk",                 __read_chk_shim },
     { "__vsnprintf_chk",            __vsnprintf_chk_shim },
     { "android_set_abort_message",  android_set_abort_message_shim },
     { "__cxa_finalize",             __cxa_finalize_shim },

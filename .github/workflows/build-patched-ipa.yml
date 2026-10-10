@@ -62,6 +62,10 @@ jobs:
             src/translation-layer/husk-tl-shim.c
           grep -nF '{ "__read_chk",                 __read_chk_shim },' \
             src/translation-layer/husk-tl-shim.c
+          grep -nF 'static int __open_2_shim(const char *path, int flags)' \
+            src/translation-layer/husk-tl-shim.c
+          grep -nF '{ "__open_2",                   __open_2_shim },' \
+            src/translation-layer/husk-tl-shim.c
           git diff --check
 
       - name: Build and package IPA/TIPA

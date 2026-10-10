@@ -19,6 +19,7 @@
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <sched.h>
 #include <stdatomic.h>
@@ -649,6 +650,11 @@ static ssize_t __read_chk_shim(int fd, void *buf, size_t count, size_t buf_size)
     return read(fd, buf, count);
 }
 
+static int __open_2_shim(const char *path, int flags)
+{
+    return open(path, flags, 0);
+}
+
 static int __vsnprintf_chk_shim(char *s, size_t maxlen, int flag, size_t slen, const char *format, va_list args)
 {
     (void)flag; (void)slen;
@@ -859,6 +865,7 @@ static const tl_export_entry g_exports[] = {
     { "__strlen_chk",               __strlen_chk_shim },
     { "__memmove_chk",              __memmove_chk_shim },
     { "__read_chk",                 __read_chk_shim },
+    { "__open_2",                   __open_2_shim },
     { "__vsnprintf_chk",            __vsnprintf_chk_shim },
     { "android_set_abort_message",  android_set_abort_message_shim },
     { "__cxa_finalize",             __cxa_finalize_shim },

@@ -66,6 +66,14 @@ jobs:
             src/translation-layer/husk-tl-shim.c
           grep -nF '{ "__open_2",                   __open_2_shim },' \
             src/translation-layer/husk-tl-shim.c
+          grep -nF 'static int __register_atfork_shim(void *prepare, void *parent, void *child, void *dso)' \
+            src/translation-layer/husk-tl-shim.c
+          grep -nF '{ "__register_atfork",          __register_atfork_shim },' \
+            src/translation-layer/husk-tl-shim.c
+          grep -nF 'static int clearenv_shim(void)' \
+            src/translation-layer/husk-tl-shim.c
+          grep -nF '{ "clearenv",                   clearenv_shim },' \
+            src/translation-layer/husk-tl-shim.c
           git diff --check
 
       - name: Build and package IPA/TIPA

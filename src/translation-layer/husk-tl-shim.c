@@ -17,6 +17,9 @@
  * entry points live in husk-tl-load.c.
  */
 #define _GNU_SOURCE
+#if defined(__APPLE__)
+#include <crt_externs.h>
+#endif
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -663,7 +666,14 @@ static int __register_atfork_shim(void *prepare, void *parent, void *child, void
 
 static int clearenv_shim(void)
 {
-    return clearenv();
+#if defined(__APPLE__)
+    char **env = *_NSGetEnviron();
+#else
+    extern char **environ;
+    char **env = environ;
+#endif
+    if (env) env[0] = NULL;
+    return 0;
 }
 
 static int __vsnprintf_chk_shim(char *s, size_t maxlen, int flag, size_t slen, const char *format, va_list args)
